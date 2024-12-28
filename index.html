@@ -79,6 +79,11 @@
         .hidden {
             display: none;
         }
+
+        .cta {
+            margin-top: 20px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -132,6 +137,9 @@
     </form>
 
     <div class="results" id="results"></div>
+    <div class="cta hidden" id="cta">
+        <p><a href="https://wytwornia-zieleni.pl/formularz-wyceny/polski" target="_blank" style="color: #007bff; text-decoration: none; font-weight: bold;">👉 Sprawdź cenę projektu ogrodu w Wytwórni Zieleni 👌</a></p>
+    </div>
 
     <script>
         const drainageType = document.getElementById('drainage-type');
@@ -143,6 +151,7 @@
         const customPipe = document.getElementById('custom-pipe');
         const calculateButton = document.getElementById('calculate');
         const resultsDiv = document.getElementById('results');
+        const ctaDiv = document.getElementById('cta');
 
         drainageType.addEventListener('change', () => {
             sandThickness.classList.toggle('hidden', !['surface', 'both'].includes(drainageType.value));
@@ -163,14 +172,16 @@
             const pipeSpacingValue = pipeOptions.value === 'custom' ? parseFloat(customPipe.value) : parseFloat(pipeOptions.value);
             const waterDisposal = document.getElementById('water-disposal').value;
 
+            let totalCost = 0;
             let resultText = `<h3>Szczegółowe Obliczenia</h3>`;
             resultText += `<p><strong>Powierzchnia działki:</strong> ${area} m²</p>`;
 
             if (['surface', 'both'].includes(drainageType.value)) {
                 const sandVolume = area * sandThicknessValue;
                 const sandCost = sandVolume * 60;
+                totalCost += sandCost;
                 resultText += `<h4>Drenaż Powierzchniowy:</h4>`;
-                resultText += `<p>Objętość piasku = ${area} m2 × ${sandThicknessValue.toFixed(2)} m = ${sandVolume.toFixed(2)} m³</p>`;
+                resultText += `<p>Objętość piasku = ${area} m² × ${sandThicknessValue.toFixed(2)} m = ${sandVolume.toFixed(2)} m³</p>`;
                 resultText += `<p>Koszt piasku = ${sandVolume.toFixed(2)} m³ × 60 zł/m³ = ${sandCost.toFixed(2)} zł</p>`;
             }
 
@@ -181,6 +192,7 @@
                 const pipeCost = pipeLength * 5;
                 const gravelCost = gravelVolume * 100;
                 const geotextileCost = geotextile * 6;
+                totalCost += pipeCost + gravelCost + geotextileCost;
                 resultText += `<h4>Drenaż Liniowy:</h4>`;
                 resultText += `<p>Koszt rury drenarskiej(100mm) = ${pipeLength.toFixed(2)} mb × 5 zł/mb = ${pipeCost.toFixed(2)} zł</p>`;
                 resultText += `<p>Koszt żwiru rzecznego  = ${gravelVolume.toFixed(2)} m³ × 100 zł/m³ = ${gravelCost.toFixed(2)} zł</p>`;
@@ -189,19 +201,23 @@
 
             if (waterDisposal === 'small-well') {
                 const smallWellCost = 1 * 100 + 10 * 6;
+                totalCost += smallWellCost;
                 resultText += `<h4>Odprowadzenie Wody: Studzienka chłonna 1m³</h4>`;
                 resultText += `<p>Koszt żwiru = 1 m³ × 100 zł/m³ = 100 zł</p>`;
                 resultText += `<p>Koszt geowłókniny = 10 mb × 6 zł/mb = 60 zł</p>`;
                 resultText += `<p>Całkowity koszt studzienki = 100 zł + 60 zł = ${smallWellCost.toFixed(2)} zł</p>`;
             } else if (waterDisposal === 'large-well') {
                 const largeWellCost = 3 * 100 + 30 * 6;
+                totalCost += largeWellCost;
                 resultText += `<h4>Odprowadzenie Wody: Studnia Chłonna 3m³</h4>`;
                 resultText += `<p>Koszt żwiru = 3 m³ × 100 zł/m³ = 300 zł</p>`;
                 resultText += `<p>Koszt geowłókniny = 30 mb × 6 zł/mb = 180 zł</p>`;
                 resultText += `<p>Całkowity koszt studni = 300 zł + 180 zł = ${largeWellCost.toFixed(2)} zł</p>`;
             }
 
+            resultText += `<h3>Całkowity Koszt: ${totalCost.toFixed(2)} zł</h3>`;
             resultsDiv.innerHTML = resultText;
+            ctaDiv.classList.remove('hidden');
         });
     </script>
 </body>
