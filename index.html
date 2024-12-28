@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Drenażu Ogrodu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            max-width: 600px;
+        }
+        label, select, input, button {
+            display: block;
+            margin: 10px 0;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kalkulator Drenażu Ogrodu</h1>
+    <form id="drainage-calculator">
+        <label for="area">Powierzchnia działki (m²):</label>
+        <input type="number" id="area" required>
+
+        <label for="drainage-type">Rodzaj drenażu:</label>
+        <select id="drainage-type" required>
+            <option value="" disabled selected>Wybierz...</option>
+            <option value="surface">Drenaż powierzchniowy</option>
+            <option value="linear">Drenaż liniowy</option>
+            <option value="both">Drenaż powierzchniowy + liniowy</option>
+        </select>
+
+        <div id="sand-thickness" class="hidden">
+            <label>Grubość warstwy piasku (cm):</label>
+            <select id="sand-options">
+                <option value="5">5 cm</option>
+                <option value="10">10 cm</option>
+                <option value="15">15 cm</option>
+                <option value="20">20 cm</option>
+                <option value="custom">Własna wartość</option>
+            </select>
+            <input type="number" id="custom-sand" class="hidden" placeholder="Wpisz grubość (cm)">
+        </div>
+
+        <div id="pipe-spacing" class="hidden">
+            <label>Rozstaw rur drenarskich (m):</label>
+            <select id="pipe-options">
+                <option value="2">2 m</option>
+                <option value="3">3 m</option>
+                <option value="4">4 m</option>
+                <option value="custom">Własna wartość</option>
+            </select>
+            <input type="number" id="custom-pipe" class="hidden" placeholder="Wpisz rozstaw (m)">
+        </div>
+
+        <label for="water-disposal">Odprowadzenie wody:</label>
+        <select id="water-disposal" required>
+            <option value="" disabled selected>Wybierz...</option>
+            <option value="ditch">Rów melioracyjny</option>
+            <option value="tank">Zbiornik na deszczówkę</option>
+            <option value="none">Brak zbiornika (teren przepuszczalny)</option>
+            <option value="small-well">Studzienka zbiorcza 1m³(teren średnio przepuszczalny)</option>
+            <option value="large-well">Studnia chłonna 3m³(teren słabo przepuszczalny)</option>
+        </select>
+
+        <button type="button" id="calculate">Oblicz</button>
+    </form>
+
+    <h2>Wyniki</h2>
+    <div id="results"></div>
+
+    <script>
+        const drainageType = document.getElementById('drainage-type');
+        const sandThickness = document.getElementById('sand-thickness');
+        const sandOptions = document.getElementById('sand-options');
+        const customSand = document.getElementById('custom-sand');
+        const pipeSpacing = document.getElementById('pipe-spacing');
+        const pipeOptions = document.getElementById('pipe-options');
+        const customPipe = document.getElementById('custom-pipe');
+        const calculateButton = document.getElementById('calculate');
+        const resultsDiv = document.getElementById('results');
+
+        drainageType.addEventListener('change', () => {
+            sandThickness.classList.toggle('hidden', !['surface', 'both'].includes(drainageType.value));
+            pipeSpacing.classList.toggle('hidden', !['linear', 'both'].includes(drainageType.value));
+        });
+
+        sandOptions.addEventListener('change', () => {
+            customSand.classList.toggle('hidden', sandOptions.value !== 'custom');
+        });
+
+        pipeOptions.addEventListener('change', () => {
+            customPipe.classList.toggle('hidden', pipeOptions.value !== 'custom');
+        });
+
+        calculateButton.addEventListener('click', () => {
+            const area = parseFloat(document.getElementById('area').value);
+            const sandThicknessValue = sandOptions.value === 'custom' ? parseFloat(customSand.value) / 100 : parseFloat(sandOptions.value) / 100;
+            const pipeSpacingValue = pipeOptions.value === 'custom' ? parseFloat(customPipe.value) : parseFloat(pipeOptions.value);
+            const waterDisposal = document.getElementById('water-disposal').value;
+
+            let resultText = `<h3>Szczegółowe Obliczenia</h3>`;
+            resultText += `<p><strong>Powierzchnia działki:</strong> ${area} m²</p>`;
+
+            if (['surface', 'both'].includes(drainageType.value)) {
+                const sandVolume = area * sandThicknessValue;
+                const sandCost = sandVolume * 60;
+                resultText += `<h4>Drenaż Powierzchniowy:</h4>`;
+                resultText += `<p>Objętość piasku = ${area} × ${sandThicknessValue.toFixed(2)} = ${sandVolume.toFixed(2)} m³</p>`;
+                resultText += `<p>Koszt piasku = ${sandVolume.toFixed(2)} × 60 zł/m³ = ${sandCost.toFixed(2)} zł</p>`;
+            }
+
+            if (['linear', 'both'].includes(drainageType.value)) {
+                const pipeLength = area / pipeSpacingValue;
+                const gravelVolume = pipeLength * 0.16;
+                const geotextile = pipeLength;
+                const pipeCost = pipeLength * 5;
+                const gravelCost = gravelVolume * 100;
+                const geotextileCost = geotextile * 6;
+                resultText += `<h4>Drenaż Liniowy:</h4>`;
+                resultText += `<p>Koszt rur = ${pipeLength.toFixed(2)} mb × 5 zł/mb= ${pipeCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Koszt żwiru = ${gravelVolume.toFixed(2)} m³ × 100 zł/m³ = ${gravelCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Koszt geowłókniny = ${geotextile.toFixed(2)} mb × 6 zł/mb= ${geotextileCost.toFixed(2)} zł</p>`;
+            }
+
+            if (waterDisposal === 'small-well') {
+                const smallWellCost = 1 * 100 + 10 * 6;
+                resultText += `<h4>Odprowadzenie Wody: Studzienka Zbiorcza 1m³</h4>`;
+                resultText += `<p>Koszt żwiru = 1 m³ × 100 zł/m³ = 100 zł</p>`;
+                resultText += `<p>Koszt geowłókniny = 10 mb × 6 zł/mb = 60 zł</p>`;
+                resultText += `<p>Całkowity koszt studzienki = 100 + 60 = ${smallWellCost.toFixed(2)} zł</p>`;
+            } else if (waterDisposal === 'large-well') {
+                const largeWellCost = 3 * 100 + 30 * 6;
+                resultText += `<h4>Odprowadzenie Wody: Studnia Chłonna 3m³</h4>`;
+                resultText += `<p>Koszt żwiru = 3 m³ × 100 zł/m³ = 300 zł</p>`;
+                resultText += `<p>Koszt geowłókniny = 30 mb × 6 zł/mb = 180 zł</p>`;
+                resultText += `<p>Całkowity koszt studni = 300 + 180 = ${largeWellCost.toFixed(2)} zł</p>`;
+            }
+
+            resultsDiv.innerHTML = resultText;
+        });
+    </script>
+</body>
+</html>
