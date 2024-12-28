@@ -7,20 +7,82 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            max-width: 600px;
+            margin: 0;
+            padding: 20px;
+            background-color: #f6f6f6;
         }
-        label, select, input, button {
+
+        h2 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        form {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 1260px;
+        }
+
+        label {
             display: block;
-            margin: 10px 0;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
         }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+        }
+
+        input:focus, select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #0f4e55;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        button:hover {
+            background-color: #093a40;
+        }
+
+        .results {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
         .hidden {
             display: none;
         }
     </style>
 </head>
 <body>
-    <h1>Kalkulator Drenażu Ogrodu</h1>
+    <h2>Kalkulator Drenażu Ogrodu</h2>
     <form id="drainage-calculator">
         <label for="area">Powierzchnia działki (m²):</label>
         <input type="number" id="area" required>
@@ -61,16 +123,15 @@
             <option value="" disabled selected>Wybierz...</option>
             <option value="ditch">Rów melioracyjny</option>
             <option value="tank">Zbiornik na deszczówkę</option>
-            <option value="none">Brak zbiornika (teren przepuszczalny)</option>
-            <option value="small-well">Studzienka zbiorcza 1m³(teren średnio przepuszczalny)</option>
-            <option value="large-well">Studnia chłonna 3m³(teren słabo przepuszczalny)</option>
+            <option value="none">Brak studni chłonnej (teren przepuszczalny)</option>
+            <option value="small-well">Studzienka chłonna 1m³ (teren średnio przepuszczalny)</option>
+            <option value="large-well">Studnia chłonna 3m³ (teren słabo przepuszczalny)</option>
         </select>
 
         <button type="button" id="calculate">Oblicz</button>
     </form>
 
-    <h2>Wyniki</h2>
-    <div id="results"></div>
+    <div class="results" id="results"></div>
 
     <script>
         const drainageType = document.getElementById('drainage-type');
@@ -109,8 +170,8 @@
                 const sandVolume = area * sandThicknessValue;
                 const sandCost = sandVolume * 60;
                 resultText += `<h4>Drenaż Powierzchniowy:</h4>`;
-                resultText += `<p>Objętość piasku = ${area} × ${sandThicknessValue.toFixed(2)} = ${sandVolume.toFixed(2)} m³</p>`;
-                resultText += `<p>Koszt piasku = ${sandVolume.toFixed(2)} × 60 zł/m³ = ${sandCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Objętość piasku = ${area} m2 × ${sandThicknessValue.toFixed(2)} m = ${sandVolume.toFixed(2)} m³</p>`;
+                resultText += `<p>Koszt piasku = ${sandVolume.toFixed(2)} m³ × 60 zł/m³ = ${sandCost.toFixed(2)} zł</p>`;
             }
 
             if (['linear', 'both'].includes(drainageType.value)) {
@@ -121,23 +182,23 @@
                 const gravelCost = gravelVolume * 100;
                 const geotextileCost = geotextile * 6;
                 resultText += `<h4>Drenaż Liniowy:</h4>`;
-                resultText += `<p>Koszt rur = ${pipeLength.toFixed(2)} mb × 5 zł/mb= ${pipeCost.toFixed(2)} zł</p>`;
-                resultText += `<p>Koszt żwiru = ${gravelVolume.toFixed(2)} m³ × 100 zł/m³ = ${gravelCost.toFixed(2)} zł</p>`;
-                resultText += `<p>Koszt geowłókniny = ${geotextile.toFixed(2)} mb × 6 zł/mb= ${geotextileCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Koszt rury drenarskiej(100mm) = ${pipeLength.toFixed(2)} mb × 5 zł/mb = ${pipeCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Koszt żwiru rzecznego  = ${gravelVolume.toFixed(2)} m³ × 100 zł/m³ = ${gravelCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Koszt geowłókniny(2m szer) = ${geotextile.toFixed(2)} mb × 6 zł/mb = ${geotextileCost.toFixed(2)} zł</p>`;
             }
 
             if (waterDisposal === 'small-well') {
                 const smallWellCost = 1 * 100 + 10 * 6;
-                resultText += `<h4>Odprowadzenie Wody: Studzienka Zbiorcza 1m³</h4>`;
+                resultText += `<h4>Odprowadzenie Wody: Studzienka chłonna 1m³</h4>`;
                 resultText += `<p>Koszt żwiru = 1 m³ × 100 zł/m³ = 100 zł</p>`;
                 resultText += `<p>Koszt geowłókniny = 10 mb × 6 zł/mb = 60 zł</p>`;
-                resultText += `<p>Całkowity koszt studzienki = 100 + 60 = ${smallWellCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Całkowity koszt studzienki = 100 zł + 60 zł = ${smallWellCost.toFixed(2)} zł</p>`;
             } else if (waterDisposal === 'large-well') {
                 const largeWellCost = 3 * 100 + 30 * 6;
                 resultText += `<h4>Odprowadzenie Wody: Studnia Chłonna 3m³</h4>`;
                 resultText += `<p>Koszt żwiru = 3 m³ × 100 zł/m³ = 300 zł</p>`;
                 resultText += `<p>Koszt geowłókniny = 30 mb × 6 zł/mb = 180 zł</p>`;
-                resultText += `<p>Całkowity koszt studni = 300 + 180 = ${largeWellCost.toFixed(2)} zł</p>`;
+                resultText += `<p>Całkowity koszt studni = 300 zł + 180 zł = ${largeWellCost.toFixed(2)} zł</p>`;
             }
 
             resultsDiv.innerHTML = resultText;
